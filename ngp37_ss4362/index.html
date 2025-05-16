@@ -113,7 +113,8 @@
             font-weight: 500;
         }
 
-        .justify-text {
+        .justify-text,
+        p {
             /* justify text */
             text-align: justify;
         }
@@ -125,6 +126,7 @@
             margin: 1em 0;
             font-size: 1em;
         }
+
 
         code {
             font-family: 'Fira Code', monospace;
@@ -150,7 +152,7 @@
         <h1 style="font-size: 2.5em; color: #004080; margin-bottom: 0.2em;">
             ECE 5730 Final Project: DJ Synth Pad
         </h1>
-        <p style="font-size: 1.2em; color: #444;">
+        <p style="text-align: center !important;">
             Nicholas Papapanou (ngp37) &nbsp;|&nbsp; Sivaraman Sankar (ss4362)
         </p>
         <div style="text-align:center; margin-top: 1em;">
@@ -205,29 +207,36 @@
                 inside interrupt service routines (ISRs).
             </p>
 
-        <p>
-            For piano synthesis, we use Direct Digital Synthesis (DDS), which generates tones by
-            iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
-            increment for a desired frequency <code>F<sub>s</sub></code> is computed as:
-            <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
-            where <code>F<sub>s</sub></code> is the DAC sampling rate. The high bits of the accumulator index into the
-            table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and decay
-            profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via a
-            potentiometer.
-        </p>
-
-        <p>
-            For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
-            all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch (e.g., a
-            buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform and
-            the output is computed as:
-            <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
-            where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using fixed-point
-            multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a vibrating
-            string. Parameters like damping, buffer size, and waveform type can be tuned per note.
-        </p>
+            <p>
+                For piano synthesis, we use Direct Digital Synthesis (DDS), which generates tones by
+                iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
+                increment for a desired frequency <code>F<sub>s</sub></code> is computed as:
+                <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
+                where <code>F<sub>s</sub></code> is the DAC sampling rate. The high bits of the accumulator index into
+                the
+                table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and
+                decay
+                profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via
+                a
+                potentiometer.
+            </p>
 
             <p>
+                For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
+                all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch
+                (e.g., a
+                buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform
+                and
+                the output is computed as:
+                <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
+                where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using
+                fixed-point
+                multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a
+                vibrating
+                string. Parameters like damping, buffer size, and waveform type can be tuned per note.
+            </p>
+
+            <p class="callout">
                 Implementation details for both methods are discussed further in the Software Design section. These
                 techniques are adapted from the ECE 5730 course material, with full references provided in <a
                     href="#appendices-d">Appendix D</a>.
@@ -276,7 +285,7 @@
             seamless musical interaction across all channels.
         </p>
 
-        <img src="images/logic_flow_final.png" alt="Logic Block Diagram">
+        <img src="images/logic_flow_final.png" alt="Logic Block Diagram" style="padding: 1em;">
 
         <h3>Hardware/Software Tradeoffs</h3>
         <p>
@@ -328,18 +337,18 @@
         <img src="images/wiring_note.png" alt="Wiring Note" style="width: 60%; display: block; margin: 0 auto;">
 
         <h3>Peripheral Pinouts</h3>
-        <div style="display: flex; justify-content: space-between; gap: 1em; flex-wrap: wrap; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; gap: 1em; flex-wrap: wrap; align-items: flex-end;">
             <div style="flex: 1; text-align: center;">
                 <img src="images/keypad_pins.png" alt="Keypad Pinout" style="max-width: 100%; height: auto;">
-                <p style="font-size: 0.9em;">Keypad GPIO Connections</p>
+                <p style="font-size: 0.9em; text-align: center;">Keypad GPIO Connections</p>
             </div>
             <div style="flex: 1; text-align: center;">
                 <img src="images/dac_pins.png" alt="DAC Pinout" style="max-width: 100%; height: auto;">
-                <p style="font-size: 0.9em;">MCP4822 DAC Pinout</p>
+                <p style="font-size: 0.9em; text-align: center;">MCP4822 DAC Pinout</p>
             </div>
             <div style="flex: 1; text-align: center;">
                 <img src="images/vga_pins.png" alt="VGA Pinout" style="max-width: 100%; height: auto;">
-                <p style="font-size: 0.9em;">VGA Connector Pinout</p>
+                <p style="font-size: 0.9em; text-align: center;">VGA Connector Pinout</p>
             </div>
         </div>
 
@@ -538,77 +547,88 @@
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowfullscreen></iframe>
 
-        <p>Here are the drum samples played via DMA playback of <code>.wav</code> files converted to
-            <code>const unsigned short</code> arrays.
-        </p>
+        <div style="padding: 1rem">
+            <p>Here are the drum samples played via DMA playback of <code>.wav</code> files
+                converted to
+                <code>const unsigned short</code> arrays.
+            </p>
 
-        <div class="audioline">
-            <span>Kick:</span>
-            <audio controls>
-                <source src="audio/kick.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Snare:</span>
-            <audio controls>
-                <source src="audio/snare.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Hi-hat:</span>
-            <audio controls>
-                <source src="audio/hihat.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Tom 2:</span>
-            <audio controls>
-                <source src="audio/lowtom.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Tom 1:</span>
-            <audio controls>
-                <source src="audio/hightom.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Clap:</span>
-            <audio controls>
-                <source src="audio/clap.wav" type="audio/wav">
-            </audio>
-        </div>
+            <div style="display: flex; flex-direction: column; gap: 1em;">
 
-        <p>Here are the backing tracks played via DMA playback of <code>.wav</code> files converted to
-            <code>const unsigned short</code> arrays.
-        </p>
-
-        <div class="audioline">
-            <span>Drums:</span>
-            <audio controls loop>
-                <source src="audio/backing_drums1.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Jazzy:</span>
-            <audio controls loop>
-                <source src="audio/backing_jazzy.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Rock:</span>
-            <audio controls loop>
-                <source src="audio/backing_rock.wav" type="audio/wav">
-            </audio>
-        </div>
-        <div class="audioline">
-            <span>Mellow:</span>
-            <audio controls loop>
-                <source src="audio/backing_mellow.wav" type="audio/wav">
-            </audio>
+                <div class="audioline">
+                    <span>Kick:</span>
+                    <audio controls>
+                        <source src="audio/kick.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Snare:</span>
+                    <audio controls>
+                        <source src="audio/snare.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Hi-hat:</span>
+                    <audio controls>
+                        <source src="audio/hihat.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Tom 2:</span>
+                    <audio controls>
+                        <source src="audio/lowtom.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Tom 1:</span>
+                    <audio controls>
+                        <source src="audio/hightom.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Clap:</span>
+                    <audio controls>
+                        <source src="audio/clap.wav" type="audio/wav">
+                    </audio>
+                </div>
+            </div>
         </div>
 
-        <p> Check out the bonus demo clips in <a href="#appendices">Appendix E</a> for a couple of cool musical
+        <div style="padding: 1rem">
+            <p>Here are the backing tracks played via DMA playback of <code>.wav</code> files converted to
+                <code>const unsigned short</code> arrays.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 1em;">
+
+                <div class="audioline">
+                    <span>Drums:</span>
+                    <audio controls loop>
+                        <source src="audio/backing_drums1.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Jazzy:</span>
+                    <audio controls loop>
+                        <source src="audio/backing_jazzy.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Rock:</span>
+                    <audio controls loop>
+                        <source src="audio/backing_rock.wav" type="audio/wav">
+                    </audio>
+                </div>
+                <div class="audioline">
+                    <span>Mellow:</span>
+                    <audio controls loop>
+                        <source src="audio/backing_mellow.wav" type="audio/wav">
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <p class="callout"> Check out the bonus demo clips in <a href="#appendices-e">Appendix E</a> for a couple of
+            cool musical
             performances! </p>
 
         <h3>Speed</h3>
@@ -690,7 +710,8 @@
 
         <p> Much of the project code was written, debugged, and tested collaboratively, via pair programming.
             However, during asynchronous development, each member had different areas of focus.</p>
-        <p> Siva was primarily responsible for: </p>
+        <p> Sivaraman was primarily responsible for: </p>
+        <hr>
         <ul>
             <li> Integrating the DDS algorithm for piano synthesis</li>
             <li> Integrating the Karplus-Strong algorithm for guitar synthesis</li>
@@ -699,6 +720,7 @@
         </ul>
 
         <p> Nick was primarily responsible for: </p>
+        <hr>
         <ul>
             <li> Hardware setup and implementation </li>
             <li> Integrating DMA playback for the drums and backing tracks</li>
@@ -706,7 +728,8 @@
             <li> Expanding and refining the final VGA user interface </li>
         </ul>
 
-        <p> Nick drafted the report and built the website, and Siva created the schematics/diagrams for the report and
+        <p> Nick drafted the report and built the website, and Sivaraman created the schematics/diagrams for the report
+            and
             refined its content.</p>
 
         <section id="appendices-d">
@@ -732,17 +755,21 @@
                 <li><a href="https://www.sameskydevices.com/product/resource/sj1-355xng.pdf">Audio Jack</a></li>
             </ul>
         </section>
-        <h3>Appendix E: Bonus Videos</h3>
-        <p>Here are a couple of videos of us playing around on the DJ Synth Pad!</p>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/0aDUNd44HOk" title="Bonus Demo 1"
-            style="border: none;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen></iframe>
+        <section id="appendices-e">
+            <h3>Appendix E: Bonus Videos</h3>
+            <p>Here are a couple of videos of us playing around on the DJ Synth Pad!</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/0aDUNd44HOk" title="Bonus Demo 1"
+                style="border: none;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
 
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/_2VrnSMRxgU" title="Bonus Demo 2"
-            style="border: none;"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen></iframe>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/_2VrnSMRxgU" title="Bonus Demo 2"
+                style="border: none;"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+
+            <br>
+        </section>
     </section>
 </body>
 
