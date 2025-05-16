@@ -205,19 +205,16 @@
                 inside interrupt service routines (ISRs).
             </p>
 
-            <p>
-                For piano synthesis, we use <a href="https://vanhunteradams.com/DDS/DDS.html" target="_blank">Direct
-                    Digital Synthesis (DDS)</a>, which generates tones by
-                iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
-                increment for a desired frequency <em>F<sub>out</sub></em> is computed as:
-                <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
-                where <em>F<sub>s</sub></em> is the DAC sampling rate. The high bits of the accumulator index into the
-                table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and
-                decay
-                profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via
-                a
-                potentiometer.
-            </p>
+        <p>
+            For piano synthesis, we use Direct Digital Synthesis (DDS), which generates tones by
+            iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
+            increment for a desired frequency <code>F<sub>s</sub></code> is computed as:
+            <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
+            where <code>F<sub>s</sub></code> is the DAC sampling rate. The high bits of the accumulator index into the
+            table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and decay
+            profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via a
+            potentiometer.
+        </p>
 
         <p>
             For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
@@ -279,14 +276,7 @@
             seamless musical interaction across all channels.
         </p>
 
-        <p>
-            Below is a diagram of the system architecture, showing the major components and their interactions.
-        </p>
-
-        <!-- add caption -->
-        <img src="images/logic_flow.jpg" alt="Logic Block Diagram"
-            style="width: 90%; display: block; margin: 0 auto; padding: 2rem;">
-
+        <img src="images/logic_flow_final.png" alt="Logic Block Diagram">
 
         <h3>Hardware/Software Tradeoffs</h3>
         <p>
@@ -363,7 +353,7 @@
             DJ Synth Pad’s software architecture is built around the protothreads cooperative multitasking model,
             distributed across the RP2040’s dual cores. Core 0 handles audio synthesis, DMA playback, keypad input, and
             potentiometer-based pitch bending, while Core 1 manages the VGA display and state-driven UI. All major
-            componens are implemented in C using fixed-point arithmetic for fast real-time performance. Audio routines
+            components are implemented in C using fixed-point arithmetic for fast real-time performance. Audio routines
             use interrupt service routines (ISRs) or DMA, and
             UI state is synchronized between cores via multicore FIFO messaging.
         </p>
@@ -509,7 +499,7 @@
             and backing track, along with live visuals of key presses and drum hits. Core 1 runs five dedicated
             protothreads that call helper functions from <code>vga16_graphics.c</code> to render text, shapes, and color
             changes to the screen. The piano UI includes a 14-key layout with black and white keys that highlight
-            pressed notes in <code>ORANGE</code>. Notes vary depending on the selected key signature, and the correct
+            pressed notes in orange. Notes vary depending on the selected key signature, and the correct
             labels are rendered dynamically. The drum pad UI features a 2x3 grid with labeled pads that momentarily turn
             white when hit, providing a clear flash for visual emphasis before reverting. A seek bar updates every
             frame, advancing a small circle whose speed is scaled to the total frame length of the current track, stored
