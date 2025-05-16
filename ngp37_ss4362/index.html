@@ -367,7 +367,7 @@
             DJ Synth Pad’s software architecture is built around the protothreads cooperative multitasking model,
             distributed across the RP2040’s dual cores. Core 0 handles audio synthesis, DMA playback, keypad input, and
             potentiometer-based pitch bending, while Core 1 manages the VGA display and state-driven UI. All major
-            componens are implemented in C using fixed-point arithmetic for fast real-time performance. Audio routines
+            components are implemented in C using fixed-point arithmetic for fast real-time performance. Audio routines
             use interrupt service routines (ISRs) or DMA, and
             UI state is synchronized between cores via multicore FIFO messaging.
         </p>
@@ -513,7 +513,7 @@
             and backing track, along with live visuals of key presses and drum hits. Core 1 runs five dedicated
             protothreads that call helper functions from <code>vga16_graphics.c</code> to render text, shapes, and color
             changes to the screen. The piano UI includes a 14-key layout with black and white keys that highlight
-            pressed notes in <code>ORANGE</code>. Notes vary depending on the selected key signature, and the correct
+            pressed notes in orange. Notes vary depending on the selected key signature, and the correct
             labels are rendered dynamically. The drum pad UI features a 2x3 grid with labeled pads that momentarily turn
             white when hit, providing a clear flash for visual emphasis before reverting. A seek bar updates every
             frame, advancing a small circle whose speed is scaled to the total frame length of the current track, stored
