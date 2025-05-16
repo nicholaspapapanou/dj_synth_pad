@@ -219,16 +219,20 @@
                 potentiometer.
             </p>
 
-        <p>
-            For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
-            all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch (e.g., a
-            buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform and
-            the output is computed as:
-            <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
-            where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using fixed-point
-            multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a vibrating
-            string. Parameters like damping, buffer size, and waveform type can be tuned per note.
-        </p>
+            <p>
+                For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
+                all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch
+                (e.g., a
+                buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform
+                and
+                the output is computed as:
+                <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
+                where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using
+                fixed-point
+                multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a
+                vibrating
+                string. Parameters like damping, buffer size, and waveform type can be tuned per note.
+            </p>
 
             <p>
                 Implementation details for both methods are discussed further in the Software Design section. These
@@ -240,7 +244,7 @@
 
         <h3>Logical Structure</h3>
 
-        <p>
+        <p class="justify-text">
             DJ Synth Pad operates as a tightly integrated embedded music system driven
             by the RP2040’s dual-core architecture, implemented primarily in <code>dj.c</code>. The system is split into
             two major domains:
