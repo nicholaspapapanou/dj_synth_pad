@@ -219,22 +219,16 @@
                 potentiometer.
             </p>
 
-            <p>
-                For guitar synthesis, we implemented a <a
-                    href="https://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis"
-                    target="_blank">Karplus-Strong algorithm</a> with added low-pass and
-                all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch
-                (e.g., a
-                buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform —
-                we
-                support Gaussian, noise, low-pass filtered noise, and sawtooth — and the output is computed as:
-                <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
-                where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using
-                fixed-point
-                multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a
-                vibrating
-                string. Parameters like damping, buffer size, and waveform type can be tuned per note.
-            </p>
+        <p>
+            For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
+            all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch (e.g., a
+            buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform and
+            the output is computed as:
+            <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
+            where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using fixed-point
+            multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a vibrating
+            string. Parameters like damping, buffer size, and waveform type can be tuned per note.
+        </p>
 
             <p>
                 Implementation details for both methods are discussed further in the Software Design section. These
@@ -324,7 +318,7 @@
 
         <h3>Overview</h3>
         <p>
-            All hardware used in DJ Synth Pad was sourced from prior ECE 5730 labs—no additional components were
+            All hardware used in DJ Synth Pad was sourced from prior ECE 5730 labs, so no additional components were
             purchased for this project. The system integrates a Raspberry Pi Pico (RP2040) microcontroller with the
             following peripherals: a 3x4 matrix keypad for user input, a potentiometer connected to the ADC for pitch
             bending, an MCP4822 SPI DAC for stereo audio output, and a VGA display driven via PIO and DMA. Connections
@@ -334,7 +328,6 @@
                 href="#appendices-d">Appendix D</a>.
         </p>
 
-
         <h3>Hardware Schematic</h3>
         <img src="images/schematic.png" alt="Hardware Schematic">
 
@@ -343,7 +336,6 @@
 
         <h3>Detailed Wiring Description</h3>
         <img src="images/wiring_note.png" alt="Wiring Note" style="width: 60%; display: block; margin: 0 auto;">
-
 
         <h3>Peripheral Pinouts</h3>
         <div style="display: flex; justify-content: space-between; gap: 1em; flex-wrap: wrap; align-items: flex-start;">
@@ -371,8 +363,8 @@
             DJ Synth Pad’s software architecture is built around the protothreads cooperative multitasking model,
             distributed across the RP2040’s dual cores. Core 0 handles audio synthesis, DMA playback, keypad input, and
             potentiometer-based pitch bending, while Core 1 manages the VGA display and state-driven UI. All major
-            components—piano, guitar, drums, backing tracks, and visual feedback—are implemented in C using fixed-point
-            arithmetic for fast real-time performance. Audio routines use interrupt service routines (ISRs) or DMA, and
+            componens are implemented in C using fixed-point arithmetic for fast real-time performance. Audio routines
+            use interrupt service routines (ISRs) or DMA, and
             UI state is synchronized between cores via multicore FIFO messaging.
         </p>
 
@@ -449,9 +441,8 @@
             <code>const unsigned short</code> arrays using our custom <code>convertWav.py</code> script. This script
             reads a mono <code>.wav</code> file and generates C arrays that can be directly included and streamed from
             flash memory, by prepending the necessary DAC configuration bits (<code>0b0011</code> for channel A,
-            <code>0b1011</code> for channel B) to each 12-bit sample.
-            The DMA timers are configured to output at 22.05 kHz, and the fraction
-            <code>250 MHz × 2 / 22673</code> was used to match this rate, ensuring audio quality.
+            <code>0b1011</code> for channel B) to each 12-bit sample. The DMA timers are configured to output at 22.05
+            kHz, and the fraction <code>250 MHz × 2 / 22673</code> was used to match this rate, ensuring audio quality.
         </p>
         <p>
             Each drum sound and backing track has its own <code>.c</code> file, which is linked into <code>dj.c</code>
@@ -495,8 +486,6 @@
             a half step down) and 1.06 (frequency of a half step up) to avoid jitter and ensure smooth response.
 
         </p>
-
-
 
         <h3>Guitar: Karplus-Strong String Synthesis</h3>
         <p>
@@ -542,8 +531,8 @@
         <h3>Overview</h3>
         <p>
             DJ Synth Pad successfully demonstrated real-time audio synthesis, layered playback, and interactive control
-            using low-cost embedded hardware. All system components—including dual-core protothread scheduling, DMA
-            playback, and visual feedback—functioned as intended without hangs or crashes. The final product supported
+            using low-cost embedded hardware. All system components, including dual-core protothread scheduling, DMA
+            playback, and visual feedback, functioned as intended without hangs or crashes. The final product supported
             smooth mode switching, pitch bending, and musical improvisation using only a keypad and potentiometer, with
             engaging visual feedback on VGA.
         </p>
@@ -632,21 +621,17 @@
         <p> Check out the bonus demo clips in <a href="#appendices">Appendix E</a> for a couple of cool musical
             performances! </p>
 
-
         <h3>Speed</h3>
         <p>
             The system exhibited fast response and seamless concurrency. DMA playback from flash to DAC channels had no
             perceptible latency, and multiple drum samples could be triggered back-to-back or layered over backing
             tracks with no hesitation. VGA UI refreshes were distributed across five protothreads and updated without
             flicker at a stable ~30 FPS. To support this, we overclocked the RP2040's CPU to 250 MHz in
-            <code>main()</code>,
-            which drastically improved VGA rendering smoothness and reduced visual tearing. Audio ISR routines ran at
-            50 kHz for DDS and 22.05 kHz for DMA, and all protothread execution completed comfortably within timing
-            margins.
-            Notably, when a backing track is playing and multiple drum sounds are overlaid, minor DMA contention can
-            cause a
-            slight flicker or vibrato in the VGA output—an effect we came to view as a visual enhancement rather than a
-            flaw.
+            <code>main()</code>, which drastically improved VGA rendering smoothness and reduced visual tearing. Audio
+            ISR routines ran at 50 kHz for DDS and 22.05 kHz for DMA, and all protothread execution completed
+            comfortably within timing margins. Notably, when a backing track is playing and multiple drum sounds are
+            overlaid, minor DMA contention can cause a slight flicker or vibrato in the VGA output—an effect we came to
+            view as a visual enhancement or "feature" rather than a flaw.
         </p>
 
         <h3>Accuracy</h3>
@@ -690,16 +675,15 @@
 
         <p>
             Our design adhered to all safety, interface, and timing constraints expected for embedded musical systems.
-            We made heavy use of publicly available resources provided through ECE 5730—including protothread
-            infrastructure, VGA and SPI drivers, and Karplus-Strong and DDS examples—which we adapted to our specific
-            application. All audio files were sourced from copyright-free libraries, and no IP-protected code,
-            datasheets, or proprietary protocols were reverse-engineered or NDA-restricted. While our project doesn't
-            directly present a patent opportunity, it serves as a platform for future enhancements, especially for
-            hardware-triggered percussion or advanced audio layering. Overall, we’re proud of the technical depth,
-            musical flexibility, and creative satisfaction this project delivered.
+            We adapted publicly available resources provided on the ECE 5730 course webpage, including protothread
+            infrastructure, VGA and SPI drivers, and Karplus-Strong and DDS examples to our specific application. All
+            audio files were sourced from copyright-free libraries, and no IP-protected code, datasheets, or proprietary
+            protocols were reverse-engineered or NDA-restricted. While our project doesn'tdirectly present a patent
+            opportunity, it serves as a platform for future enhancements, especially for hardware-triggered percussion
+            or advanced audio layering. Overall, we’re proud of the technical depth, musical flexibility, and creative
+            satisfaction this project delivered.
         </p>
     </section>
-
 
     <section id="appendices">
         <h2>Appendices</h2>
