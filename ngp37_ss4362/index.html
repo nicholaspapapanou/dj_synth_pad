@@ -113,6 +113,19 @@
             font-weight: 500;
         }
 
+        .justify-text {
+            /* justify text */
+            text-align: justify;
+        }
+
+        .callout {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            padding: 1em;
+            margin: 1em 0;
+            font-size: 1em;
+        }
+
         code {
             font-family: 'Fira Code', monospace;
             background-color: #f4f4f4;
@@ -183,53 +196,69 @@
 
         <h3>Background Math</h3>
 
-        <p>
-            At the core of our audio system is fixed-point arithmetic, which allows us to perform fast,
-            fractional math using integer-only operations on the RP2040. We use 16.15 fixed-point formats for
-            representing real-valued quantities with high precision and low overhead. This lets us compute
-            multiplications, divisions, and filtering operations efficiently within timing constraints, particularly
-            inside interrupt service routines (ISRs).
-        </p>
+        <div class="justify-text">
+            <p>
+                At the core of our audio system is fixed-point arithmetic, which allows us to perform fast,
+                fractional math using integer-only operations on the RP2040. We use 16.15 fixed-point formats for
+                representing real-valued quantities with high precision and low overhead. This lets us compute
+                multiplications, divisions, and filtering operations efficiently within timing constraints, particularly
+                inside interrupt service routines (ISRs).
+            </p>
 
-        <p>
-            For piano synthesis, we use Direct Digital Synthesis (DDS), which generates tones by
-            iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
-            increment for a desired frequency <em>F<sub>out</sub></em> is computed as:
-            <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
-            where <em>F<sub>s</sub></em> is the DAC sampling rate. The high bits of the accumulator index into the
-            table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and decay
-            profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via a
-            potentiometer.
-        </p>
+            <p>
+                For piano synthesis, we use <a href="https://vanhunteradams.com/DDS/DDS.html" target="_blank">Direct
+                    Digital Synthesis (DDS)</a>, which generates tones by
+                iteratively incrementing a 32-bit phase accumulator and indexing into a 256-point sine lookup table. The
+                increment for a desired frequency <em>F<sub>out</sub></em> is computed as:
+                <code>phase_incr = (F<sub>out</sub> × 2<sup>32</sup>) / F<sub>s</sub></code>
+                where <em>F<sub>s</sub></em> is the DAC sampling rate. The high bits of the accumulator index into the
+                table, and the output is scaled using a fixed-point amplitude envelope with programmable attack and
+                decay
+                profiles. DDS provides stable, real-time tone generation with smooth pitch bending, which we control via
+                a
+                potentiometer.
+            </p>
 
-        <p>
-            For guitar synthesis, we implemented a Karplus-Strong algorithm with added low-pass and
-            all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch (e.g., a
-            buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform — we
-            support Gaussian, noise, low-pass filtered noise, and sawtooth — and the output is computed as:
-            <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
-            where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using fixed-point
-            multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a vibrating
-            string. Parameters like damping, buffer size, and waveform type can be tuned per note.
-        </p>
+            <p>
+                For guitar synthesis, we implemented a <a
+                    href="https://en.wikipedia.org/wiki/Karplus%E2%80%93Strong_string_synthesis"
+                    target="_blank">Karplus-Strong algorithm</a> with added low-pass and
+                all-pass filtering. Each note is represented by a circular buffer whose length determines the pitch
+                (e.g., a
+                buffer length of 76 at 20kHz approximates a C4 note). The buffer is initialized with a pluck waveform —
+                we
+                support Gaussian, noise, low-pass filtered noise, and sawtooth — and the output is computed as:
+                <code>y[n] = η × (lowpass(x[n]) - y[n-1]) + x[n-1]</code>,
+                where <code>η</code> is a fractional delay tuning parameter, and the system is implemented using
+                fixed-point
+                multipliers for all arithmetic. The filtered feedback simulates natural decay and harmonics of a
+                vibrating
+                string. Parameters like damping, buffer size, and waveform type can be tuned per note.
+            </p>
 
-        <p>
-            Implementation details for both methods are discussed further in the Software Design section. These
-            techniques are adapted from the ECE 5730 course material, with full references provided in <a
-                href="#appendices">Appendix D</a>.
-        </p>
+            <p>
+                Implementation details for both methods are discussed further in the Software Design section. These
+                techniques are adapted from the ECE 5730 course material, with full references provided in <a
+                    href="#appendices-d">Appendix D</a>.
+            </p>
+
+        </div>
 
         <h3>Logical Structure</h3>
 
         <p>
             DJ Synth Pad operates as a tightly integrated embedded music system driven
             by the RP2040’s dual-core architecture, implemented primarily in <code>dj.c</code>. The system is split into
-            two major domains: Core 0 handles real-time audio synthesis and hardware input, while Core 1 manages the VGA
-            display and UI state.
+            two major domains:
+        <ul>
+            <li>Core 0: Handles real-time audio synthesis and manages hardware input(s)</li>
+            <li>Core 1: Manages the VGA display and UI state</li>
+        </ul>
+
         </p>
 
-        <p>
-            Core 0 runs three main protothreads: one for keypad input handling and system state changes, one for
+        <p class="justify-text">
+            <b>Core 0 </b>runs three main subroutines: one for keypad input handling and system state changes, one for
             potentiometer-based pitch bending, and one for guitar synthesis. The keypad is decoded to trigger piano
             notes, drum samples, scale and instrument switching, and backing track control. Piano notes are generated
             via DDS inside a high-frequency timer ISR, while guitar tones invoke a Karplus-Strong algorithm that uses a
@@ -237,30 +266,41 @@
             via dual-channel DMA using SPI, with separate channels (A and B) for each of the two speakers.
         </p>
 
-        <p>
-            Core 1 is dedicated to VGA rendering, utilizing five protothreads for visual updates: title and
+        <p class="justify-text">
+            <b>Core 1 </b>is dedicated to VGA rendering, utilizing five protothreads for visual updates: title and
             instructions, piano key visualization, drum pad visualization, playback state (seek bar, labels), and a
             queue polling thread that receives updates from Core 0. Communication between cores is handled using the
-            <code>multicore_fifo</code> system, where structured messages encode note changes, instrument mode, and drum
+            <code>multicore_fifo</code> system, where structured messages encode note changes, instrument mode, and
+            drum
             presses. These messages are parsed on Core 1 and rendered as stateful UI feedback.
         </p>
 
-        <p>
+        <p class="justify-text">
             Audio output is handled by an MCP4822 SPI DAC, with Channel A used for backing tracks and Channel B for
             piano, guitar, or drum output. The DAC is clocked at 20 MHz and synchronized with DMA or ISR writes
-            depending on the audio path. The potentiometer, connected to ADC0, continuously updates a fixed-point pitch
+            depending on the audio path. The potentiometer, connected to ADC0, continuously updates a fixed-point
+            pitch
             multiplier that dynamically affects DDS frequency. The entire system is coordinated at high performance
             through interrupt timers, multithreaded state machines, DMA chaining, and SPI streaming, allowing for
             seamless musical interaction across all channels.
         </p>
 
-        <img src="images/logic_block_diagram.png" alt="Logic Block Diagram">
+        <p>
+            Below is a diagram of the system architecture, showing the major components and their interactions.
+        </p>
+
+        <!-- add caption -->
+        <img src="images/logic_flow.jpg" alt="Logic Block Diagram"
+            style="width: 90%; display: block; margin: 0 auto; padding: 2rem;">
+
 
         <h3>Hardware/Software Tradeoffs</h3>
         <p>
-            The system design favors software implementations for flexibility and expandability. All audio synthesis,
+            The system design favors software implementations for flexibility and expandability. All audio
+            synthesis,
             input handling, and UI control are implemented in software using protothreads and
-            ISR routines. We leveraged hardware peripherals—namely the SPI controller, ADC, and DMA engine—for precise,
+            ISR routines. We leveraged hardware peripherals—namely the SPI controller, ADC, and DMA engine—for
+            precise,
             efficient data transfer. While some audio routing could have been offloaded to dedicated audio ICs or
             hardware mixers, implementing everything in software on the RP2040 allowed us to finely control timing,
             layering, and resource sharing, especially for synchronized drum and backing track playback.
@@ -268,10 +308,11 @@
 
         <h3>Relevant Patents, Copyrights, and Trademarks</h3>
         <p>
-            All <code>.wav</code> samples used in this project, both for drum hits and backing tracks, were sourced from
+            All <code>.wav</code> samples used in this project, both for drum hits and backing tracks, were sourced
+            from
             copyright-free libraries and are cleared for non-commercial use. We based our synthesis techniques on
             publicly available course materials and research papers, with citations provided in
-            <a href="#appendices">Appendix D</a>. No proprietary trademarks or patented protocols were
+            <a href="#appendices-d">Appendix D</a>. No proprietary trademarks or patented protocols were
             reverse-engineered or violated in the
             course of this project.
         </p>
@@ -290,12 +331,12 @@
             were made on a standard breadboard with passive components like resistors for VGA signal conditioning and
             overcurrent protection on the keypad GPIOs. Pin assignments and electrical connections are documented in
             the schematic and wiring note below. Relevant datasheets and hardware resources are included in <a
-                href="#appendices">Appendix D</a>.
+                href="#appendices-d">Appendix D</a>.
         </p>
 
 
         <h3>Hardware Schematic</h3>
-        <img src="images/hardware_schematic.png" alt="Hardware Schematic">
+        <img src="images/schematic.png" alt="Hardware Schematic">
 
         <h3>Physical Circuit</h3>
         <img src="images/physical_circuit.png" alt="Physical Circuit">
@@ -338,7 +379,7 @@
         <p>
             The following software components draw heavily from ECE 5730 course examples, particularly for audio
             synthesis, protothreads, VGA rendering, and SPI/DMA configuration. All referenced course resources are
-            listed in <a href="#appendices">Appendix D</a>.
+            listed in <a href="#appendices-d">Appendix D</a>.
         </p>
 
         <h3>FSMs and User Input Handling</h3>
@@ -694,27 +735,29 @@
         <p> Nick drafted the report and built the website, and Siva created the schematics/diagrams for the report and
             refined its content.</p>
 
-        <h3>Appendix D: References</h3>
-        <h4>Course Resources and Demo Code</h4>
-        <ul>
-            <li><a href="https://vanhunteradams.com/DDS/DDS.html">Direct Digital Synthesis</a></li>
-            <li><a href="https://vanhunteradams.com/Pico/Keypad/Keypad.html">3x4 Matrix Keypad</a></li>
-            <li><a href="https://vanhunteradams.com/Protocols/SPI/SPI.html">SPI Communication</a></li>
-            <li><a href="https://vanhunteradams.com/Pico/VGA/VGA.html">VGA Driver</a></li>
-            <li><a href="https://vanhunteradams.com/FixedPoint/FixedPoint.html">Fixed-Point Arithmetic</a></li>
-            <li><a href="https://people.ece.cornell.edu/land/courses/ece4760/PIC32/index_sound_synth.html">Digital Sound
-                    Synthesis</a></li>
-            <li><a href="https://people.ece.cornell.edu/land/courses/ece4760/PIC32/Sound_synth/KS_DAC_brl4.c">Karplus
-                    Strong Demo Code</a></li>
-            <li><a href="https://github.com/vha3/Hunter-Adams-RP2040-Demos/tree/master">Course Demo Code</a></li>
-        </ul>
-        <h4>Hardware Datasheets</h4>
-        <ul>
-            <li><a href="https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf">RP2040</a></li>
-            <li><a href="https://vanhunteradams.com/Pico/Birds/DAC.pdf">MCP4822 DAC</a></li>
-            <li><a href="https://www.sameskydevices.com/product/resource/sj1-355xng.pdf">Audio Jack</a></li>
-        </ul>
-
+        <section id="appendices-d">
+            <h3>Appendix D: References</h3>
+            <h4>Course Resources and Demo Code</h4>
+            <ul>
+                <li><a href="https://vanhunteradams.com/DDS/DDS.html">Direct Digital Synthesis</a></li>
+                <li><a href="https://vanhunteradams.com/Pico/Keypad/Keypad.html">3x4 Matrix Keypad</a></li>
+                <li><a href="https://vanhunteradams.com/Protocols/SPI/SPI.html">SPI Communication</a></li>
+                <li><a href="https://vanhunteradams.com/Pico/VGA/VGA.html">VGA Driver</a></li>
+                <li><a href="https://vanhunteradams.com/FixedPoint/FixedPoint.html">Fixed-Point Arithmetic</a></li>
+                <li><a href="https://people.ece.cornell.edu/land/courses/ece4760/PIC32/index_sound_synth.html">Digital
+                        Sound
+                        Synthesis</a></li>
+                <li><a href="https://people.ece.cornell.edu/land/courses/ece4760/PIC32/Sound_synth/KS_DAC_brl4.c">Karplus
+                        Strong Demo Code</a></li>
+                <li><a href="https://github.com/vha3/Hunter-Adams-RP2040-Demos/tree/master">Course Demo Code</a></li>
+            </ul>
+            <h4>Hardware Datasheets</h4>
+            <ul>
+                <li><a href="https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf">RP2040</a></li>
+                <li><a href="https://vanhunteradams.com/Pico/Birds/DAC.pdf">MCP4822 DAC</a></li>
+                <li><a href="https://www.sameskydevices.com/product/resource/sj1-355xng.pdf">Audio Jack</a></li>
+            </ul>
+        </section>
         <h3>Appendix E: Bonus Videos</h3>
         <p>Here are a couple of videos of us playing around on the DJ Synth Pad!</p>
         <iframe width="560" height="315" src="https://www.youtube.com/embed/0aDUNd44HOk" title="Bonus Demo 1"
